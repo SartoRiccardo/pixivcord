@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import json
 import pixivpy3
 from retry import retry

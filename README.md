@@ -1,4 +1,4 @@
-# Discordbooru
+# Pixivcord
 Pixiv posts to Discord with multiple webhooks.
 
 ## Installation

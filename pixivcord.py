@@ -84,18 +84,15 @@ def get_global_settings():
     return ret
 
 
-def make_embed(feed, post, rich=True):
+def make_embed(feed, post, first=True, last=True):
     embed = {
       "type": "rich",
       "color": int(feed['color'], 16) if 'color' in feed else 0x000000,
       "image": {
         "url": post['image_url']
       },
-      "footer": {
-        "text": f"ID: {post['id']}"
-      },
     }
-    if rich:
+    if first:
         embed = {
             "title": f"New post in {feed['name']}",
             "fields": [
@@ -110,6 +107,13 @@ def make_embed(feed, post, rich=True):
                 "icon_url": post['author_pfp']
             },
             "url": f"https://www.pixiv.net/en/artworks/{post['id']}",
+            **embed,
+        }
+    if last:
+        embed = {
+            "footer": {
+              "text": f"ID: {post['id']}"
+            },
             **embed,
         }
     return {"embeds": [embed]}
@@ -248,8 +252,9 @@ def get_embeds(feed, posts):
     """
     ret = []
     first = True
-    for p in posts:
-        ret.append(make_embed(feed, p, rich=first))
+    for i in range(len(posts)):
+        p = posts[i]
+        ret.append(make_embed(feed, p, first=(i == 0), last=(i == len(posts)-1)))
         if first:
             first = False
     return ret

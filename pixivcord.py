@@ -234,6 +234,7 @@ def is_blacklisted(post, feed):
     return None
 
 
+@retry(Exception, delay=1, backoff=2, jitter=2, logger=logger)
 def get_new_feed_posts(feed):
     global global_settings
     # Refreshes the global settings every loop.
@@ -242,10 +243,11 @@ def get_new_feed_posts(feed):
     posts = []
 
     last_known_post_id = get_last_posted_for(feed["id"])
-    result = api.search_illust("宮出口 瑞霊")
+    result = api.search_illust(feed["keyword"])
 
-    if "illusts" not in result:
-        print(f"\n{result}\n")
+    if "error" in result:
+        api.auth(refresh_token=REFRESH_TOKEN)
+        raise TypeError
 
     first_loop = True
     for entry in result.illusts:

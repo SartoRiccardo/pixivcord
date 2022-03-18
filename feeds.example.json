@@ -1,0 +1,20 @@
+{
+  "global_settings": {
+    "blacklist": {
+      "tags": ["loli", "shota", "guro", "bestiality"],
+      "users": []
+    }
+  },
+  "feeds": [
+    {
+      "id": "any-unique-string",
+      "webhook": "https://webhook.url.here/",
+      "keyword": "宮出口 瑞霊",
+      "name": "Mizuchi Feed",
+      "blacklist": {
+        "tags": [],
+        "users": []
+      }
+    }
+  ]
+}

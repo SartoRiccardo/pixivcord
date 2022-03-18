@@ -244,8 +244,11 @@ def get_new_feed_posts(feed):
     last_known_post_id = get_last_posted_for(feed["id"])
     result = api.search_illust("宮出口 瑞霊")
 
+    if "illusts" not in result:
+        print(f"\n{result}\n")
+
     first_loop = True
-    for entry in result['illusts']:
+    for entry in result.illusts:
         # Record the newest post
         if first_loop:
             first_loop = False

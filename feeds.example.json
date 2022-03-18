@@ -14,7 +14,10 @@
       "blacklist": {
         "tags": [],
         "users": []
-      }
+      },
+      "color": "000000",
+      "is_nsfw": false,
+      "only_nsfw": false
     }
   ]
 }

@@ -13,6 +13,20 @@ import traceback
 from config import REFRESH_TOKEN
 
 
+class SanityLevel:
+    UNCHECKED = 0
+    GRAY = 1
+    WHITE = 2
+    SEMI_BLACK = 4
+    BLACK = 6
+
+
+class Rating:
+    ALL = 0
+    R18 = 1
+    R18G = 2
+
+
 SLEEP_TIME = 60 * 5
 logger = None
 global_settings = None
@@ -175,11 +189,21 @@ def break_post_images(post):
         author_pfp_url = upload_pixiv_img_elsewhere(author_pfp)
 
     ret = []
-    for image in post["meta_pages"]:
-        image_url = upload_pixiv_img_elsewhere(image.image_urls.original)
-        if image_url is None:
-            return []
+    if len(post.meta_pages) > 0:
+        for image in post.meta_pages:
+            image_url = upload_pixiv_img_elsewhere(image.image_urls.original)
+            if image_url is None:
+                return []
 
+            ret.append({
+                'id': post.id,
+                'author_name': f"{post.user.name} - @{post.user.account}",
+                'author_id': post.user.id,
+                'author_pfp': author_pfp_url,
+                'image_url': image_url
+            })
+    else:
+        image_url = upload_pixiv_img_elsewhere(post.meta_single_page.original_image_url)
         ret.append({
             'id': post.id,
             'author_name': f"{post.user.name} - @{post.user.account}",
@@ -192,6 +216,13 @@ def break_post_images(post):
 
 
 def is_blacklisted(post, feed):
+    if "is_nsfw" in feed:
+        if not feed["is_nsfw"] and post.x_rating != Rating.ALL:
+            return "nsfw-in-sfw"
+
+        if feed["is_nsfw"] and feed["only_nsfw"] and post.x_rating == Rating.ALL:
+            return "sfw-in-nsfw"
+
     forbidden_tags = feed['blacklist']['tags'] + global_settings['blacklist']['tags']
     for tag in post.tags:
         if tag.name in forbidden_tags or tag.translated_name in forbidden_tags:
@@ -272,12 +303,15 @@ def main():
     while True:
         feeds = get_feeds()
         for feed in feeds:
-            posts = get_new_feed_posts(feed)
-            embeds = []
-            for post in posts:
-                embeds += get_embeds(feed, post)
-            for e in embeds:
-                make_post(feed, e)
+            try:
+                posts = get_new_feed_posts(feed)
+                embeds = []
+                for post in posts:
+                    embeds += get_embeds(feed, post)
+                for e in embeds:
+                    make_post(feed, e)
+            except Exception as e:
+                logger.critical(traceback.format_exc())
         time.sleep(SLEEP_TIME)
 
 
